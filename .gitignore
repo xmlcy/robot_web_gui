@@ -31,6 +31,6 @@
 build/*
 install/*
 log/*
-ros2/build/*
-ros2/install/*
-ros2/log/*
+ros2_ws/build/*
+ros2_ws/install/*
+ros2_ws/log/*
