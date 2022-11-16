@@ -135,6 +135,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+ros_msg = "none"
 
 class WebsocketNode(Node):
     def __init__(self, name):
@@ -143,7 +144,9 @@ class WebsocketNode(Node):
         self.sub = self.create_subscription(String, 'nihao', self.std_callback, 10) # 订阅std
     
     def std_callback(self, action):
-            print(action)
+        print(action)
+        global ros_msg
+        ros_msg = action.data
 
 
 # async def run_node():
@@ -196,11 +199,14 @@ class CListen(threading.Thread):
  
 async def consumer(message):
     print(message)
+    msg = String()
+    msg.data = message
+    node.pub.publish(msg)
 
 async def producer():
-    await asyncio.sleep(1)
-    x = 500
-    return str(x)
+    global ros_msg
+    await asyncio.sleep(0.5)
+    return str(ros_msg)
 
 async def consumer_handler(websocket):
     async for message in websocket:
@@ -225,6 +231,10 @@ async def webs(args=None):
 
 
 def main():
+    rclpy.init()
+    global node
+    node = WebsocketNode("web_node")
+
     newLoop = asyncio.new_event_loop()
     listen = CListen(newLoop)
     listen.setDaemon(True)
@@ -232,8 +242,6 @@ def main():
  
     asyncio.run_coroutine_threadsafe(webs(), newLoop)
 
-    rclpy.init()
-    node = WebsocketNode("web_node")
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
