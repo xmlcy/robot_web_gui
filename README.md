@@ -33,7 +33,8 @@ python server.py
 
 ## ROS2 功能包
 
-由于websockets中使用asyncio，还没研究明白，所以暂时只能单方向接收web数据，通过ros2发布
+~~由于websockets中使用asyncio，还没研究明白，所以暂时只能单方向接收web数据，通过ros2发布~~
+由于websockets中使用asyncio，结合多线程，实现ros2和web双向消息传递
 
 ### 功能包使用
 
