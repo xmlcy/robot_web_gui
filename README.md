@@ -56,3 +56,21 @@ ros2 topic echo /action
 3. 使用浏览器打开 front_end/index.html
 
 4. 选择表情演示 点击表情菜单中的按钮即可在终端看到消息
+
+## 视频传输功能
+
+使用 websocket 传输视频
+
+### 使用
+
+首先确保有一个摄像头 序号为0 笔记本默认为自带摄像头
+
+1. 开启服务端传输视频帧
+
+``` shell
+python ./back_end/img_send.py
+```
+
+2. 使用浏览器打开 front_end/index.html
+
+3. 选择表情跟随 可以看到摄像头图像

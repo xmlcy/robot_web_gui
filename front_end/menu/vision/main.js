@@ -3,7 +3,7 @@ function log(msg) {
 }
 
 // setup websocket with callbacks
-var ws = new WebSocket('ws://localhost:8080/');
+var ws = new WebSocket('ws://localhost:8090/');
 ws.onopen = function() {
   log('CONNECT');
 };
@@ -11,7 +11,8 @@ ws.onclose = function() {
   log('DISCONNECT');
 };
 ws.onmessage = function(event) {
-  log('MESSAGE: ' + event.data);
+  // log('MESSAGE: ' + event.data);
+  document.getElementById("image").src = "data:image/jpeg;base64," + event.data;
 };
 
 function createParagraph() {
