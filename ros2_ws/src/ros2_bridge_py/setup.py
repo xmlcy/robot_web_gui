@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'bridge_websocket = ros2_bridge_py.bridge_websocket:main'
+            'bridge_websocket = ros2_bridge_py.bridge_websocket:main',
+            'bridge_video = ros2_bridge_py.bridge_video:main'
         ],
     },
 )
