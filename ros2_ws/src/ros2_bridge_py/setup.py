@@ -1,4 +1,6 @@
 from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'ros2_bridge_py'
 
@@ -10,6 +12,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('lib', package_name), glob('ros2_bridge_py/*.dat')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -21,7 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             'bridge_websocket = ros2_bridge_py.bridge_websocket:main',
-            'bridge_video = ros2_bridge_py.bridge_video:main'
+            'bridge_video = ros2_bridge_py.bridge_video:main',
+            'bridge_dlib = ros2_bridge_py.bridge_dlib:main'
         ],
     },
 )
