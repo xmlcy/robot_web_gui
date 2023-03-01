@@ -23,18 +23,26 @@ encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),95]
 
 # 向服务器端实时发送视频截图
 async def send_msg(websocket):
-    global ret,frame
-    while ret:
-        result, imgencode = cv2.imencode('.jpg', frame, encode_param)
-        data = np.array(imgencode)
-        img = data.tobytes()
+    try:
+        while True:
+            global ret,frame
+            while ret:
+                result, imgencode = cv2.imencode('.jpg', frame, encode_param)
+                data = np.array(imgencode)
+                img = data.tobytes()
 
-        # base64编码传输
-        img = base64.b64encode(img).decode()
-        await websocket.send(img)
-        await asyncio.sleep(0.05) # 如果需要转发web消息 必须加入延时
+                # base64编码传输
+                img = base64.b64encode(img).decode()
+                await websocket.send(img)
+                await asyncio.sleep(0.05) # 如果需要转发web消息 必须加入延时
 
-        ret, frame = capture.read()
+                ret, frame = capture.read()
+    except asyncio.exceptions.CancelledError:
+        print('Could not complete sending')
+    except websockets.exceptions.ConnectionClosedError:
+        print('Connection unexpectly closed')
+    except websockets.exceptions.ConnectionClosed:
+        print('Connection closed during sending')
 
 class WebsocketNode(Node):
     def __init__(self, name):
@@ -47,16 +55,15 @@ class WebsocketNode(Node):
         global ros_msg
         ros_msg = action.data
  
-class CListen(threading.Thread):
-    def __init__(self, loop):
+class WebSocketThread(threading.Thread):
+    def __init__(self, name):
         threading.Thread.__init__(self)
-        self.mLoop = loop
+        self.name = name
  
     def run(self):
-        asyncio.set_event_loop(self.mLoop)  # 在新线程中开启一个事件循环
-        print("prepare run_for")
-        self.mLoop.run_forever()
-        print("end run_for")  # 跑不到这里
+        print("start")
+        asyncio.run(webs())
+        print("stop")
  
  
 async def consumer(message):
@@ -71,20 +78,35 @@ async def producer():
     return str(ros_msg)
 
 async def consumer_handler(websocket):
-    async for message in websocket:
-        await consumer(message)
+    try:
+        async for message in websocket:
+            await consumer(message)
+    except websockets.exceptions.ConnectionClosedError:
+        print('Connection unexpectly closed')
+    except websockets.exceptions.ConnectionClosedOK:
+        print('Connection closed')
 
 async def producer_handler(websocket):
-    while True:
-        message = await producer()
-        await websocket.send(message)
+    try:
+        while True:
+            message = await producer()
+            await websocket.send(message)
+    except asyncio.exceptions.CancelledError:
+        print('Could not complete sending')
+    except websockets.exceptions.ConnectionClosedError:
+        print('Connection unexpectly closed')
+    except websockets.exceptions.ConnectionClosed:
+        print('Connection closed during sending')
 
 async def handler(websocket):
-    await asyncio.gather(
-        consumer_handler(websocket),
-        # producer_handler(websocket),
-        send_msg(websocket),
-    )
+    try:
+        await asyncio.gather(
+            consumer_handler(websocket),
+            # producer_handler(websocket),
+            send_msg(websocket),
+        )
+    except asyncio.exceptions.CancelledError:
+        print('Caught unfinished task')
 
 
 async def webs(args=None):
@@ -98,12 +120,8 @@ def main():
     global node
     node = WebsocketNode("web_video_node")
 
-    newLoop = asyncio.new_event_loop()
-    listen = CListen(newLoop)
-    listen.setDaemon(True)
-    listen.start()
- 
-    asyncio.run_coroutine_threadsafe(webs(), newLoop)
+    thread_websocket = WebSocketThread("websocket")
+    thread_websocket.start()
 
     rclpy.spin(node)
     node.destroy_node()

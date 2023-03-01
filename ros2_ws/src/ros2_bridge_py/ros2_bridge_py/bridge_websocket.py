@@ -130,7 +130,6 @@
 import websockets
 import threading
 import asyncio
-import datetime
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
@@ -148,53 +147,16 @@ class WebsocketNode(Node):
         global ros_msg
         ros_msg = action.data
 
-
-# async def run_node():
-#     rclpy.init()
-#     node = WebsocketNode("web_node")
-#     rclpy.spin(node)
-#     node.destroy_node()
-#     rclpy.shutdown()
  
-gLock = threading.Lock()
- 
- 
-def getTime():
-    global gLock
-    gLock.acquire()
-    now = datetime.datetime.now()
-    tm = ":".join([
-        str(now.day).zfill(2),
-        str(now.hour).zfill(2),
-        str(now.minute).zfill(2),
-        str(now.second).zfill(2),
-        str(now.microsecond)
-    ])
-    gLock.release()
-    return tm
- 
- 
-def log(*msg):
- 
-    tm = getTime()
-    global gLock
-    gLock.acquire()
-    # 数组前面加参数，代表把数组拆分成多个逗号分割的变量，类似js中的展开符号...
-    text = ",".join([tm, "  ", *msg])
-    print(text)
-    gLock.release()
- 
- 
-class CListen(threading.Thread):
-    def __init__(self, loop):
+class WebSocketThread(threading.Thread):
+    def __init__(self, name):
         threading.Thread.__init__(self)
-        self.mLoop = loop
+        self.name = name
  
     def run(self):
-        asyncio.set_event_loop(self.mLoop)  # 在新线程中开启一个事件循环
-        log("prepare run_for")
-        self.mLoop.run_forever()
-        log("end run_for")  # 跑不到这里
+        print("start")
+        asyncio.run(webs())
+        print("stop")
  
  
 async def consumer(message):
@@ -209,19 +171,34 @@ async def producer():
     return str(ros_msg)
 
 async def consumer_handler(websocket):
-    async for message in websocket:
-        await consumer(message)
+    try:
+        async for message in websocket:
+            await consumer(message)
+    except websockets.exceptions.ConnectionClosedError:
+        print('Connection unexpectly closed')
+    except websockets.exceptions.ConnectionClosedOK:
+        print('Connection closed')
 
 async def producer_handler(websocket):
-    while True:
-        message = await producer()
-        await websocket.send(message)
+    try:
+        while True:
+            message = await producer()
+            await websocket.send(message)
+    except asyncio.exceptions.CancelledError:
+        print('Could not complete sending')
+    except websockets.exceptions.ConnectionClosedError:
+        print('Connection unexpectly closed')
+    except websockets.exceptions.ConnectionClosed:
+        print('Connection closed during sending')
 
 async def handler(websocket):
-    await asyncio.gather(
-        consumer_handler(websocket),
-        producer_handler(websocket),
-    )
+    try:
+        await asyncio.gather(
+            consumer_handler(websocket),
+            producer_handler(websocket),
+        )
+    except asyncio.exceptions.CancelledError:
+        print('Caught unfinished task')
 
 
 async def webs(args=None):
@@ -235,12 +212,8 @@ def main():
     global node
     node = WebsocketNode("web_node")
 
-    newLoop = asyncio.new_event_loop()
-    listen = CListen(newLoop)
-    listen.setDaemon(True)
-    listen.start()
- 
-    asyncio.run_coroutine_threadsafe(webs(), newLoop)
+    thread_websocket = WebSocketThread("websocket")
+    thread_websocket.start()
 
     rclpy.spin(node)
     node.destroy_node()
