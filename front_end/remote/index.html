@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<!--
+ The MIT License (MIT)
+
+ This file is part of the JoyStick Project (https://github.com/bobboteck/JoyStick).
+ Copyright (c) 2015 Roberto D'Amico (Bobboteck).
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+-->
+<html>
+	<head>
+		<title>Joy</title>
+		<meta charset="utf-8">
+		<meta name="description" content="Example page of use pure Javascript JoyStick">
+		<meta name="author" content="Roberto D'Amico">
+		<link rel="shortcut icon" type="image/png" href="http://bobboteck.github.io/img/roberto-damico-bobboteck.png">
+		<style>
+*
+{
+	box-sizing: border-box;
+}
+body
+{
+	margin: 0px;
+	padding: 0px;
+	font-family: monospace;
+}
+.row
+{
+	display: inline-flex;
+	clear: both;
+}
+.columnLateral
+{
+  float: left;
+  width: 15%;
+  min-width: 400px;
+}
+.columnCetral
+{
+  float: left;
+  width: 70%;
+  min-width: 300px;
+}
+#joy2Div
+{
+	width:300px;
+	height:300px;
+	margin:10px
+}
+#joystick
+{
+	border: 1px solid #FF0000;
+}
+#joystick2
+{
+	border: 1px solid #0000FF;
+}
+		</style>
+		<script src="joy.min.js"></script>
+	</head>
+	<body>
+		<div class="row">
+			<div class="columnLateral">
+				<div id="joy1Div" style="width:300px;height:300px;margin:10px"></div>
+				Posizione X:<input id="joy1PosizioneX" type="text" /><br />
+				Posizione Y:<input id="joy1PosizioneY" type="text" /><br />
+				Direzione:<input id="joy1Direzione" type="text" /><br />
+				X :<input id="joy1X" type="text" /></br>
+				Y :<input id="joy1Y" type="text" />
+			</div>
+			<div class="columnCetral">
+				<h2>JoyStick</h2>
+				<p>
+					模拟遥控器
+				</p>
+				<pre id="log">连接状态</pre>
+				<pre id="mode">mode</pre>
+				<pre id="cmd">cmd</pre>
+				<pre id="pos_x">x</pre>
+				<pre id="pos_y">y</pre>
+				<pre id="pos_z">z</pre>
+				<pre id="status">status</pre>
+				<a href="./menu/vision/index.html"><input type="button" value="视觉跟踪" onclick="getVal(this.value)"></a>
+			</div>
+			<div class="columnLateral">
+				<div id="joy2Div"></div>
+				Posizione X:<input id="joy2PosizioneX" type="text" /></br>
+				Posizione Y:<input id="joy2PosizioneY" type="text" /></br>
+				Direzione:<input id="joy2Direzione" type="text" /></br>
+				X :<input id="joy2X" type="text" /></br>
+				Y :<input id="joy2Y" type="text" />
+			</div>			
+		</div>
+		<script type="text/javascript">
+
+var joy1IinputPosX = document.getElementById("joy1PosizioneX");
+var joy1InputPosY = document.getElementById("joy1PosizioneY");
+var joy1Direzione = document.getElementById("joy1Direzione");
+var joy1X = document.getElementById("joy1X");
+var joy1Y = document.getElementById("joy1Y");
+joy1X.value = 0;
+joy1Y.value = 0;
+
+// Create JoyStick object into the DIV 'joy1Div'
+var Joy1 = new JoyStick('joy1Div', {}, function(stickData) {
+    joy1IinputPosX.value = stickData.xPosition;
+    joy1InputPosY.value = stickData.yPosition;
+    joy1Direzione.value = stickData.cardinalDirection;
+    joy1X.value = stickData.x;
+    joy1Y.value = stickData.y;
+	// ws.send(JSON.stringify({ joyl_x: joy1X.value, joyl_y: joy1Y.value }));
+});
+
+
+var joy2IinputPosX = document.getElementById("joy2PosizioneX");
+var joy2InputPosY = document.getElementById("joy2PosizioneY");
+var joy2Direzione = document.getElementById("joy2Direzione");
+var joy2X = document.getElementById("joy2X");
+var joy2Y = document.getElementById("joy2Y");
+joy2X.value = 0;
+joy2Y.value = 0;
+
+// Create JoyStick object into the DIV 'joy2Div'
+var Joy2 = new JoyStick('joy2Div', {"title": "joystick2"}, function(stickData) {
+    joy2IinputPosX.value = stickData.xPosition;
+    joy2InputPosY.value = stickData.yPosition;
+    joy2Direzione.value = stickData.cardinalDirection;
+    joy2X.value = stickData.x;
+    joy2Y.value = stickData.y;
+	// ws.send(JSON.stringify({ joyr_x: joy2X.value, joy_ry: joy2Y.value }));
+});
+
+setInterval(function(){ ws.send(JSON.stringify({ joyl_x: joy1X.value, joyl_y: joy1Y.value, joyr_x: joy2X.value, joyr_y: joy2Y.value })); }, 50);
+
+		</script>
+		<script src="main.js"></script>
+	</body>
+</html>

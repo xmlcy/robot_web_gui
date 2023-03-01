@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<!--
+	robot web gui
+-->
+<html>
+	<head>
+		<title>robot</title>
+        <link rel='icon' href='../../images/pic.ico ' type=‘image/x-ico’ /> <!-- 头部小图标 -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<style>
+			body {
+				background-color: #000000;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+		<div style="position:relative;">
+			<div id="camera">
+				<img id="image" width="60%" height="60%">
+			</div>
+			<div style="position:absolute; z-index:2; left:10px; top:1px; font-size:20px; color:white">
+			<pre id="log">视觉连接状态</pre>
+			<pre id="log2">控制连接状态</pre>
+			<pre id="mode">mode</pre>
+			<pre id="cmd">cmd</pre>
+			<pre id="pos_x">x</pre>
+			<pre id="pos_y">y</pre>
+			<pre id="pos_z">z</pre>
+			<pre id="status">status</pre>
+			<a href="../../index.html"><input type="button" value="手动控制" onclick="getVal(this.value)"></a>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="main.js"></script>
+	</body>
+</html>
