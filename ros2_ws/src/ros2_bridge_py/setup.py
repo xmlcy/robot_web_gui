@@ -25,7 +25,8 @@ setup(
         'console_scripts': [
             'bridge_websocket = ros2_bridge_py.bridge_websocket:main',
             'bridge_video = ros2_bridge_py.bridge_video:main',
-            'bridge_dlib = ros2_bridge_py.bridge_dlib:main'
+            'bridge_dlib = ros2_bridge_py.bridge_dlib:main',
+            'bridge_remote = ros2_bridge_py.bridge_remote:main'
         ],
     },
 )
